@@ -1,11 +1,8 @@
-Package: pghelpers
+Package: helpers
 Title: Helper Functions for Allegheny County Property Data
 Version: 0.1.0
-Authors@R: person("Jimmy", "Hogan", email = "your.email@example.com", role = c("aut", "cre"))
-Description: Helper functions for loading property assessment data from
-    Western Pennsylvania Regional Data Center (WPRDC) APIs. Includes functions
-    for loading condemned properties, assessment appeals, and other property-related
-    datasets.
+Authors@R: person("Jimmy", "Cloutier", email = "cloutierjr@icloud.com", role = c("aut", "cre"))
+Description: Helper functions for R analysis
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
