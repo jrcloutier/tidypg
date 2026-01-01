@@ -1,4 +1,4 @@
-#' Load assessment appeals
+#' Load appeals
 #'
 #' Loads completed property assessment appeals from WPRDC. Returns a tibble
 #' with formatted variables, standardized municipality information, and
@@ -13,7 +13,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' appeals <- load_appeals()
+#' completed <- load_appeals()
 #' }
 load_appeals <- function() {
   resource_id <- "8a7607fb-c93e-4d7a-9b23-528b5c25b1de"

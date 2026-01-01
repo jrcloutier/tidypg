@@ -23,6 +23,7 @@
 add_parent_muni <- function(df, muni_col = "muni_name") {
   df |>
     mutate(
+      muni_code = as.character(muni_code),
       muni = str_squish(str_to_upper(.data[[muni_col]])),
       parent_muni = case_when(
         str_detect(muni, "- PITTSBURGH") ~ "PITTSBURGH",

@@ -4,18 +4,20 @@
 \alias{load_wprdc_resource}
 \title{Load data from WPRDC datastore API}
 \usage{
-load_wprdc_resource(resource_id)
+load_wprdc_resource(resource_id, limit = 32000)
 }
 \arguments{
 \item{resource_id}{The WPRDC resource ID (found in the dataset URL)}
+
+\item{limit}{Number of records to fetch per request (default: 32000, API maximum)}
 }
 \value{
-A tibble with cleaned column names (all columns are character type)
+A tibble with cleaned column names
 }
 \description{
 Generic function to load any dataset from the Western Pennsylvania Regional
-Data Center (WPRDC) using the datastore dump endpoint. Returns a tibble with
-cleaned column names.
+Data Center (WPRDC) using the CKAN datastore API. Automatically handles
+pagination to retrieve all records. Returns a tibble with cleaned column names.
 }
 \examples{
 \dontrun{
