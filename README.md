@@ -1,6 +1,6 @@
 # About
 
-Helper functions for loading Allegheny County property assessment data from the Western Pennsylvania Regional Data Center (WPRDC) APIs.
+A collection of helper functions for loading Allegheny County property assessment data from the Western Pennsylvania Regional Data Center (WPRDC) APIs.
 
 ## Installation
 
