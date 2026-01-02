@@ -4,7 +4,7 @@
 \alias{add_parent_muni}
 \title{Add parent municipality columns}
 \usage{
-add_parent_muni(df, muni_col = "muni_name")
+add_parent_muni(df, muni_name = "muni_name", muni_code = "muni_code")
 }
 \arguments{
 \item{df}{A dataframe with municipality column and muni_code column}

@@ -1,12 +1,12 @@
-Package: helpers
+Package: pghelpers
 Title: R Helper Functions
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: person("Jimmy", "Cloutier", email = "cloutierjr@icloud.com", role = c("aut", "cre"))
 Description: Helper functions for R analysis
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.0.0
+RoxygenNote: 7.3.2
 Imports:
     dplyr,
     readr,
@@ -14,3 +14,5 @@ Imports:
     stringr,
     lubridate,
     httr,
+    jsonlite,
+    tidyr

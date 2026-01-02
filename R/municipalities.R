@@ -20,11 +20,11 @@
 #' # Works with different column names
 #' df <- add_parent_muni(df, muni_col = "municipality")
 #' }
-add_parent_muni <- function(df, muni_col = "muni_name") {
+add_parent_muni <- function(df, muni_name = "muni_name", muni_code = "muni_code") {
   df |>
     mutate(
-      muni_code = as.character(muni_code),
-      muni = str_squish(str_to_upper(.data[[muni_col]])),
+      muni_code = as.character(.data[[muni_code]]),
+      muni = str_squish(str_to_upper(.data[[muni_name]])),
       parent_muni = case_when(
         str_detect(muni, "- PITTSBURGH") ~ "PITTSBURGH",
         str_detect(muni, "- MCKEESPORT") ~ "MCKEESPORT",
@@ -40,4 +40,33 @@ add_parent_muni <- function(df, muni_col = "muni_name") {
         TRUE ~ muni_code
       )
     )
+}
+
+#' Normalize city names
+#'
+#' Normalizes city names, removing punctuation marks, fixing misspellings and abbreviations.
+#'
+#' @param df A dataframe with municipality column and muni_code column
+#' @param city_col Name of the municipality column (default: "")
+#' @return Normalized municipal names in the dataframe
+#' @export
+#' @importFrom stringr str_squish str_to_upper str_detect str_replace_all
+#'
+#' @examples
+#' \dontrun{
+#' # Add parent municipality to a dataframe
+#' df <- normalize_city(df, city_col = "")
+#' }
+
+normalize_city <- function(x) {
+  x %>%
+    str_to_upper() %>% # Ensure all uppercase
+    str_replace_all("[.*]", "") %>% # Remove periods and asterisks
+    str_replace_all("\\bTOWNSHIP|TWP\\b", "") %>%
+    str_replace_all("\\bBOROUGH|BORO\\b", "") %>%
+    str_replace_all("\\bCITY\\b", "") %>%
+    str_replace_all("^MOUNT ", "MT") %>%
+    str_replace_all("^N ", "NORTH") %>%
+    str_replace_all("^MC ", "MC") %>% # Remove space between "MC" and the rest of the municipality name
+    str_squish() # Remove any extra spaces
 }
