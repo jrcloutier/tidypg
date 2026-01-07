@@ -23,9 +23,6 @@ Duquesne ward subdivisions, which appear in Allegheny County data as
 \examples{
 \dontrun{
 # Add parent municipality to a dataframe
-df <- add_parent_muni(df, muni_col = "muni_name")
-
-# Works with different column names
-df <- add_parent_muni(df, muni_col = "municipality")
+df <- add_parent_muni(df, muni_name = "muni_name", muni_code = "muni_code")
 }
 }

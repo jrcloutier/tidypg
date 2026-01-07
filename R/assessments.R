@@ -38,7 +38,7 @@ load_appeals <- function() {
     )
 
   # Add parent municipality
-  dat <- add_parent_muni(dat, muni_col = "muni_name")
+  dat <- add_parent_muni(dat, muni_name = "muni_name")
 
   # Select and rename columns
   dat |>
