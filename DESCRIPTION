@@ -1,4 +1,4 @@
-Package: pghelpers
+Package: tidypg
 Title: R Helper Functions
 Version: 0.2.0
 Authors@R: person("Jimmy", "Cloutier", email = "cloutierjr@icloud.com", role = c("aut", "cre"))

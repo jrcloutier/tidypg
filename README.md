@@ -10,14 +10,14 @@ Install from GitHub using the `remotes` package:
 # Install remotes if you don't have it
 install.packages("remotes")
 
-# Install pghelpers
-remotes::install_github("yourusername/pghelpers")
+# Install tidypg
+remotes::install_github("yourusername/tidypg")
 ```
 
 ## Usage
 
 ```r
-library(pghelpers)
+library(tidypg)
 
 # Load condemned properties
 condemned <- load_condemned_props()
