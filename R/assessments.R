@@ -48,6 +48,67 @@ load_appeals <- function() {
     )
 }
 
+#' Load appeals (backup)
+#'
+#' Loads completed property assessment appeals from WPRDC CSV file. Use when 
+#' API fails to return up-to-date records.  Returns a tibble with formatted 
+#' variables, standardized municipality information, and selected relevant 
+#' columns.
+#'
+#' @return A tibble of completed appeals with formatted dates, numeric values,
+#'   and parent municipality columns
+#' @export
+#' @importFrom readr read_csv cols
+#' @importFrom janitor clean_names
+#' @importFrom dplyr mutate across select
+#' @importFrom lubridate ymd dmy mdy
+#' @importFrom stringr str_squish str_to_upper
+#'
+#' @examples
+#' \dontrun{
+#' completed <- load_appeals_backup()
+#' }
+load_appeals_backup <- function() {
+
+  ## Step 1: download data
+
+  ## WPRDC CKAN API endpoint
+  ## Using the datastore dump endpoint with resource ID ensures stable access
+  ## even when the underlying file name changes
+  url <- "https://data.wprdc.org/dataset/2019f508-2708-4dca-a0d5-cb82c1840c7d/resource/8a7607fb-c93e-4d7a-9b23-528b5c25b1de/download/opa_appeals-data-for-wprdc_through-2026_as-of-february3rd_2026.csv"
+
+  ## Read the CSV directly from the API
+  dat <- read_csv(url, col_types = cols(.default = "c")) |>
+    clean_names()
+
+  ## Step 2: format variables
+  dat <- dat |>
+    mutate(
+      across(
+        c(
+          pre_appeal_land, pre_appeal_bldg, pre_appeal_total, post_appeal_land,
+          post_appeal_bldg, post_appeal_total, hearing_change_amount,
+          current_land_value, current_bldg_value, current_value_vs_pre_appeal
+        ),
+        as.numeric
+      ),
+      across(c(elapsed_days, tax_year), as.integer),
+      across(c(hearing_date, dispo_date), ~ dmy(.x)),
+      across(c(as_of_date), ~ mdy(.x))
+    )
+
+  ## Step 3: add parent municipality
+  dat <- add_parent_muni(dat, muni_name = "muni_name")
+
+  ## Step 4: select and rename cols
+  dat |>
+    select(
+      parid = parcel_id, tax_year, class, tax_status, muni_code, muni,
+      parent_muni, parent_muni_code, school_code:as_of_date
+    )
+}
+
+
 #' Load assessments
 #'
 #' Loads current property assessments from WPRDC. Returns a tibble
