@@ -9,22 +9,22 @@ load_violations()
 \value{
 A list with four tibbles:
 \describe{
-\item{casefiles}{Aggregated data by casefile with case summary information}
-\item{inspections}{One row per unique inspection event per casefile (not all will have a date)}
-\item{violations}{One row per unique violation per casefile}
-\item{court_hearings}{Individual court hearing records per docket, including docket number for case lookup}
+\item{pli_casefiles}{Aggregated data by casefile with case summary information}
+\item{pli_inspections}{One row per unique inspection event per casefile (not all will have a date)}
+\item{pli_violations}{One row per unique violation per casefile}
+\item{pli_hearings}{Individual court hearing records per docket, including docket number for case lookup}
 }
 }
 \description{
 Loads code violations data from WPRDC. Returns a list of four tibbles:
-casefiles, inspections, violations, and court_hearings.
+pli_casefiles, pli_inspections, pli_violations, and pli_hearings.
 The function removes records with missing parcel IDs, removes duplicates,
 and structures the data into related datasets.
 }
 \examples{
 \dontrun{
 violations_data <- load_violations()
-casefiles <- violations_data$casefiles
-violations <- violations_data$violations
+pli_casefiles <- violations_data$pli_casefiles
+pli_violations <- violations_data$pli_violations
 }
 }
