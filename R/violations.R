@@ -1,27 +1,27 @@
 #' Load Pittsburgh code violations data
 #'
-#' Loads code violations data from WPRDC. Returns a list with two tibbles:
-#' casefiles (aggregated by case) and violations (individual violation records).
+#' Loads code violations data from WPRDC. Returns a list of four tibbles:
+#' pli_casefiles, pli_inspections, pli_violations, and pli_hearings.
 #' The function removes records with missing parcel IDs, removes duplicates,
-#' and structures the data into two related datasets.
+#' and structures the data into related datasets.
 #'
 #' @return A list with four tibbles:
 #'   \describe{
-#'     \item{casefiles}{Aggregated data by casefile with case summary information}
-#'     \item{casefile_entries}{Individual casefile entry records linked to casefiles}
-#'     \item{court_cases}{One row per docket number with latest court date and decision}
-#'     \item{court_hearings}{Individual court hearing records per docket}
+#'     \item{pli_casefiles}{Aggregated data by casefile with case summary information}
+#'     \item{pli_inspections}{One row per unique inspection event per casefile (not all will have a date)}
+#'     \item{pli_violations}{One row per unique violation per casefile}
+#'     \item{pli_hearings}{Individual court hearing records per docket, including docket number for case lookup}
 #'   }
 #' @export
-#' @importFrom dplyr mutate filter group_by across slice_max ungroup arrange summarise first last n_distinct if_else select left_join
+#' @importFrom dplyr mutate filter group_by across slice_max ungroup arrange summarise first last n_distinct select distinct
 #' @importFrom lubridate ymd
 #' @importFrom tidyr separate_longer_delim
 #'
 #' @examples
 #' \dontrun{
 #' violations_data <- load_violations()
-#' casefiles <- violations_data$casefiles
-#' violations <- violations_data$violations
+#' pli_casefiles <- violations_data$pli_casefiles
+#' pli_violations <- violations_data$pli_violations
 #' }
 load_violations <- function() {
   resource_id <- "70c06278-92c5-4040-ab28-17671866f81c"
@@ -58,9 +58,7 @@ load_violations <- function() {
     slice_max(id, n = 1, with_ties = FALSE) |> 
     ungroup()
   
-  # Split into two datasets: casefiles and violations
-  
-  casefiles <- dat |>
+  pli_casefiles <- dat |>
     arrange(casefile_number, investigation_date) |>
     group_by(casefile = casefile_number) |>
     summarise(
@@ -70,20 +68,34 @@ load_violations <- function() {
       last_inspection_outcome = last(investigation_outcome[!is.na(investigation_date)]),
       n_inspects = n_distinct(investigation_date[!is.na(investigation_date)]),
       n_violations = n_distinct(violation_code_section[!is.na(violation_code_section)]),
+      violation_codes = paste(sort(unique(violation_code_section[!is.na(violation_code_section) & violation_code_section != ""])), collapse = "; "),
       has_court_case = any(!is.na(docket_number) & docket_number != ""),
       .groups = "drop"
     )
 
-  casefile_entries <- dat |>
+  pli_inspections <- dat |>
+    filter(!is.na(investigation_outcome) | !is.na(investigation_findings)) |>
+    distinct(casefile_number, parcel_id, investigation_date, investigation_outcome, investigation_findings) |>
     arrange(casefile_number, investigation_date) |>
     mutate(rowid = row_number()) |>
     select(
-      rowid, 
-      casefile = casefile_number, 
+      rowid,
+      casefile = casefile_number,
       parid = parcel_id,
       inspect_date = investigation_date,
       inspect_outcome = investigation_outcome,
-      inspect_finding = investigation_findings,
+      inspect_finding = investigation_findings
+    )
+
+  pli_violations <- dat |>
+    filter(!is.na(violation_description) | !is.na(violation_code_section)) |>
+    distinct(casefile_number, parcel_id, violation_description, violation_code_section, violation_spec_instructions) |>
+    arrange(casefile_number) |>
+    mutate(rowid = row_number()) |>
+    select(
+      rowid,
+      casefile = casefile_number,
+      parid = parcel_id,
       violation_desc = violation_description,
       violation_code = violation_code_section,
       violation_instructions = violation_spec_instructions
@@ -95,29 +107,16 @@ load_violations <- function() {
     mutate(
       docket_number = trimws(docket_number),
       court_date = ymd(court_date)
-    ) |>
-    group_by(casefile_number, docket_number) |>
-    mutate(
-      docket_id = paste(casefile_number, format(min(court_date, na.rm = TRUE), "%Y-%m-%d"), sep = "_")
-    ) |>
-    ungroup()
-
-  casefiles <- casefiles |>
-    left_join(
-      court_dat |>
-        group_by(casefile_number) |>
-        summarise(docket_ids = paste(unique(docket_id), collapse = ", "), .groups = "drop"),
-      by = c("casefile" = "casefile_number")
     )
 
-  court_hearings <- court_dat |>
-    arrange(docket_id, court_date) |>
+  pli_hearings <- court_dat |>
+    arrange(docket_number, court_date) |>
     mutate(
       court_time = format(strptime(toupper(trimws(court_time)), "%I:%M%p"), "%H:%M"),
       court_decision = toupper(court_decision)
     ) |>
     select(
-      docket_id,
+      docket_number,
       casefile = casefile_number,
       parid = parcel_id,
       court_date,
@@ -125,22 +124,10 @@ load_violations <- function() {
       court_decision
     )
 
-  court_cases <- court_dat |>
-    arrange(docket_id, court_date) |>
-    group_by(docket_id) |>
-    summarise(
-      casefile = first(casefile_number),
-      parid = first(parcel_id),
-      latest_court_date = max(court_date, na.rm = TRUE),
-      latest_court_decision = last(court_decision[!is.na(court_date)]),
-      docket_number = first(docket_number),
-      .groups = "drop"
-    )
-
   return(list(
-    casefiles = casefiles,
-    casefile_entries = casefile_entries,
-    court_cases = court_cases,
-    court_hearings = court_hearings
+    pli_casefiles = pli_casefiles,
+    pli_inspections = pli_inspections,
+    pli_violations = pli_violations,
+    pli_hearings = pli_hearings
   ))
 }

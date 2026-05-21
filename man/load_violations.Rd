@@ -10,16 +10,16 @@ load_violations()
 A list with four tibbles:
 \describe{
 \item{casefiles}{Aggregated data by casefile with case summary information}
-\item{casefile_entries}{Individual casefile entry records linked to casefiles}
-\item{court_cases}{One row per docket number with latest court date and decision}
-\item{court_hearings}{Individual court hearing records per docket}
+\item{inspections}{One row per unique inspection event per casefile (not all will have a date)}
+\item{violations}{One row per unique violation per casefile}
+\item{court_hearings}{Individual court hearing records per docket, including docket number for case lookup}
 }
 }
 \description{
-Loads code violations data from WPRDC. Returns a list with two tibbles:
-casefiles (aggregated by case) and violations (individual violation records).
+Loads code violations data from WPRDC. Returns a list of four tibbles:
+casefiles, inspections, violations, and court_hearings.
 The function removes records with missing parcel IDs, removes duplicates,
-and structures the data into two related datasets.
+and structures the data into related datasets.
 }
 \examples{
 \dontrun{
