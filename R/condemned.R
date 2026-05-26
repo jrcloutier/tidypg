@@ -25,8 +25,8 @@ load_condemned_props <- function() {
       prop_owner = owner,
       status = property_type,
       creation_date = create_date,
-      last_inspection_result, 
-      last_inspection_score,
+      latest_inspection_result,
+      latest_inspection_score,
       inspection_status,
       latitude,
       longitude
