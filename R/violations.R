@@ -7,7 +7,7 @@
 #'
 #' @return A list with four tibbles:
 #'   \describe{
-#'     \item{pli_casefiles}{Aggregated data by casefile with case summary information}
+#'     \item{pli_casefiles}{Aggregated data by casefile with case summary information, including casefile_status}
 #'     \item{pli_inspections}{One row per unique inspection event per casefile (not all will have a date)}
 #'     \item{pli_violations}{One row per unique violation per casefile}
 #'     \item{pli_hearings}{Individual court hearing records per docket, including docket number for case lookup}
@@ -69,6 +69,7 @@ load_violations <- function() {
       n_inspects = n_distinct(investigation_date[!is.na(investigation_date)]),
       n_violations = n_distinct(violation_code_section[!is.na(violation_code_section)]),
       violation_codes = paste(sort(unique(violation_code_section[!is.na(violation_code_section) & violation_code_section != ""])), collapse = "; "),
+      casefile_status = last(status),
       has_court_case = any(!is.na(docket_number) & docket_number != ""),
       .groups = "drop"
     )
