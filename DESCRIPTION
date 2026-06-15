@@ -13,6 +13,6 @@ Imports:
     janitor,
     stringr,
     lubridate,
-    httr,
+    httr2,
     jsonlite,
     tidyr

@@ -8,8 +8,7 @@
 #' @param limit Number of records to fetch per request (default: 32000, API maximum)
 #' @return A tibble with cleaned column names
 #' @export
-#' @importFrom httr GET content
-#' @importFrom jsonlite fromJSON
+#' @importFrom httr2 request req_body_json req_perform resp_body_json resp_status
 #' @importFrom dplyr bind_rows as_tibble
 #' @importFrom janitor clean_names
 #'
@@ -19,42 +18,43 @@
 #' data <- load_wprdc_resource("your-resource-id-here")
 #' }
 load_wprdc_resource <- function(resource_id, limit = 32000) {
-  base_url <- "https://data.wprdc.org/api/3/action/datastore_search"
+  base_url <- "https://data.wprdc.org/api/action/datastore_search"
 
   all_records <- list()
   offset <- 0
 
   repeat {
-    # Build query URL with parameters
-    response <- GET(
-      base_url,
-      query = list(
+    response <- request(base_url) |>
+      req_body_json(list(
         resource_id = resource_id,
         limit = limit,
         offset = offset
-      )
-    )
+      )) |>
+      req_perform()
 
-    # Parse JSON response
-    result <- content(response, as = "text", encoding = "UTF-8") |>
-      fromJSON()
+    result <- resp_body_json(response, simplifyVector = TRUE)
 
-    # Check if request was successful
-    if (!result$success) {
-      stop("API request failed: ", result$error$message)
+    if (!isTRUE(result$success)) {
+      status <- resp_status(response)
+      error_msg <- if (is.list(result$error)) {
+        msg <- result$error$message
+        if (is.null(msg)) msg <- result$error[["__type"]]
+        if (is.null(msg)) msg <- toString(names(result$error))
+        msg
+      } else {
+        as.character(result$error)
+      }
+      stop("API request failed [HTTP ", status, "]: ", error_msg)
     }
 
-    # Extract records
     records <- result$result$records
 
-    # Break if no more records
     if (length(records) == 0 || nrow(records) == 0) {
       break
     }
 
     all_records[[length(all_records) + 1]] <- records
 
-    # Break if we got fewer records than requested (last page)
     if (nrow(records) < limit) {
       break
     }
@@ -62,7 +62,6 @@ load_wprdc_resource <- function(resource_id, limit = 32000) {
     offset <- offset + limit
   }
 
-  # Combine all records and clean names
   bind_rows(all_records) |>
     as_tibble() |>
     clean_names()
